@@ -1,0 +1,46 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write # permite enviar imagem para o GHCR
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push da imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+
+      - name: Deploy na VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull ghcr.io/${{ github.repository }}:latest
+            docker logout ghcr.io
+            docker stop app || true
+            docker rm app || true
+            docker run -d --name app --restart unless-stopped -p 80:8000 \
+              ghcr.io/${{ github.repository }}:latest
+            docker image prune -f
