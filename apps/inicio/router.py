@@ -7,5 +7,5 @@ def inicio():
     return {"mensagem": "Esse é o inicio"}
 
 @router.get("/teste")
-def inicio():
+def inicio_teste():
     return {"mensagem": "Esse é o teste"}

@@ -1,16 +1,34 @@
 name: CI/CD
 
 on:
-  push:
-    branches: [main]
+  push: # qualquer branch: roda os testes
+  pull_request:
 
 permissions:
   contents: read
-  packages: write # permite enviar imagem para o GHCR
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Instalar dependências
+        run: uv sync --locked
+
+      - name: Rodar testes
+        run: uv run pytest -v
+
+  deploy:
+    needs: test # só roda se os testes passarem
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # deploy só na main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # permite enviar imagem para o GHCR
     steps:
       - uses: actions/checkout@v4
 
