@@ -7,19 +7,19 @@ client = TestClient(app)
 
 def test_raiz():
     resposta = client.get("/")
-    assert resposta.status_code == 201
+    assert resposta.status_code == 200
     assert resposta.json()["mensagem"] == "API no ar com sucesso"
 
 
 def test_inicio():
     resposta = client.get("/inicio/")
-    assert resposta.status_code == 201
+    assert resposta.status_code == 200
     assert resposta.json() == {"mensagem": "Esse é o inicio"}
 
 
 def test_inicio_teste():
     resposta = client.get("/inicio/teste")
-    assert resposta.status_code == 201
+    assert resposta.status_code == 200
     assert resposta.json() == {"mensagem": "Esse é o teste"}
 
 
