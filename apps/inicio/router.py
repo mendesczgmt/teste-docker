@@ -9,3 +9,7 @@ def inicio():
 @router.get("/teste")
 def inicio_teste():
     return {"mensagem": "Esse é o teste"}
+
+@router.get("/exibicao")
+def inicio_exibicao():
+    return {"mensagem": "Essa é a rota de exibição"}
